@@ -37,7 +37,7 @@ The R script is presented in the context of text classification as used in the a
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Vector of the true class labels for each observation.
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;alpha : *list*  
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;List with the six values for the desired conditional misclassification rates $\alpha = [\alpha_{01}, \alpha_{02}, \alpha_{10}, \alpha_{12}, \alpha_{20}, \alpha_{21}]$ corresponding to $P(C=0|\hat{C} = 1)$, $P(C=0|\hat{C} = 2)$, $P(C=1|\hat{C} = 0)$, $P(C=1|\hat{C} = 2)$, $P(C=2|\hat{C} = 0)$, and $P(C=2|\hat{C} = 1)$.
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;List with the six values for the desired conditional misclassification rates $\alpha = [\alpha_{01}, \alpha_{02}, \alpha_{10}, \alpha_{12}, \alpha_{20}, \alpha_{21}]$ corresponding to $P(\hat{C}=0|C = 1)$, $P(\hat{C}=0|C = 2)$, $P(\hat{C}=1|C = 0)$, $P(\hat{C}=1|C = 2)$, $P(\hat{C}=2|C = 0)$, and $P(\hat{C}=2|C = 1)$.
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Returns**:  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;out : *dictionary*  
