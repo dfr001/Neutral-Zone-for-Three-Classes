@@ -1,10 +1,8 @@
 import numpy as np
-from sklearn.metrics import confusion_matrix
 # for example application
 from sklearn.datasets import make_classification
 from sklearn.linear_model import LogisticRegression
 
-# let's try to speed it up
 def label_func(p0, p1, L):
     p2 = 1-p0-p1
     l01 = L[0]; l02 = L[1]; l10 = L[2]; l12 = L[3]; l20 = L[4]; l21 = L[5]
@@ -43,10 +41,16 @@ def asymmetric_neutral_zone(p0,p1,true_labels,alpha):
         L_res.append(L_pair[0]); L_res.append(L_pair[1])
     
     pred_neut = label_func(p0 = pred_probs[:,0], p1 = pred_probs[:,1], L = L_res)
-    # return [L_res, confusion_matrix(y.astype(str), pred_neut, normalize='true')[0:3,]]
+    conf_table = np.array((np.empty(4),np.empty(4),np.empty(4)))
+    for i in [0,1,2]:
+        row_sum = sum(y==i)
+        conf_table[i][0] = sum((y==i) & (pred_neut=="0"))/row_sum
+        conf_table[i][1] = sum((y==i) & (pred_neut=="1"))/row_sum
+        conf_table[i][2] = sum((y==i) & (pred_neut=="2"))/row_sum
+        conf_table[i][3] = sum((y==i) & (pred_neut=="N"))/row_sum
     d = dict();
     d['L'] = L_res
-    d['conf_table'] = confusion_matrix(y.astype(str), pred_neut, normalize='true')[0:3,]
+    d['conf_table'] = conf_table
     return d
 
 
