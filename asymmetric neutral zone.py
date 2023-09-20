@@ -2,6 +2,7 @@ import numpy as np
 # for example application
 from sklearn.datasets import make_classification
 from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import confusion_matrix
 
 def label_func(p0, p1, L):
     p2 = 1-p0-p1
@@ -12,35 +13,45 @@ def label_func(p0, p1, L):
     out[np.where(((p2 - p0 > l20) & (p0 > p1)) | ((p2 - p1 > l21) & (p1 > p0)))] = "2"
     return out
 
-def asymmetric_neutral_zone(p0,p1,true_labels,alpha):
-    all_comb = np.array(np.meshgrid(range(101),range(101))).reshape(2,101*101).T/100
-    # 01, 02, 10, 12, 20, 21
-    res = []
-    for i in [[0,1,2],[1,0,2],[2,0,1]]:
-        def cond_err_func(L_2, true_lab_vec, index):
-            L = [0 for x in range(6)]
-            L[slice(2*index[0],2*index[0]+2)] = L_2
-            cond_ind = true_lab_vec != index[0]
-            pred_lab = label_func(p0 = p0[cond_ind], p1 = p1[cond_ind], L = L)
-            cond_err_probs = []
-            cond_err_probs.append(L_2[0]);cond_err_probs.append(L_2[1])
-            pred_ind = pred_lab==str(index[0])
-            true_ind1 = true_lab_vec[cond_ind]==index[1]
-            true_ind2 = true_lab_vec[cond_ind]==index[2]
-            cond_err_probs.append(sum(pred_ind[true_ind1])/sum(true_ind1))
-            cond_err_probs.append(sum(pred_ind[true_ind2])/sum(true_ind2))
-            return cond_err_probs
-        res.append(np.apply_along_axis(cond_err_func, 1, all_comb, true_lab_vec=true_labels, index=i))
+def asymmetric_neutral_zone(p0,p1,true_labels,alpha):        
+    L_final = []
+    for i1 in [[0,1,2],[1,0,2],[2,0,1]]:
+        cond_ind = true_labels != i1[0]
+        alpha_2 = alpha[slice(2*i1[0],2*i1[0]+2)]
+        L_2_list = []
+        err_list = []
+        area = []
+        first = [999]
+        second = [999]
+        for i2 in range(101):
+            for i3 in range(101):
+                b=False
+                L = [0 for x in range(6)]
+                L_2 = [0,0]; L_2[0] = i2/100; L_2[1] = i3/100
+                L[slice(2*i1[0],2*i1[0]+2)] = L_2
+                pred_lab = label_func(p0 = p0[cond_ind], p1 = p1[cond_ind], L = L)
+                pred_ind = pred_lab==str(i1[0])
+                true_ind1 = true_labels[cond_ind]==i1[1]
+                true_ind2 = true_labels[cond_ind]==i1[2]
+                err1 = sum(pred_ind[true_ind1])/sum(true_ind1)
+                err2 = sum(pred_ind[true_ind2])/sum(true_ind2)
+                if err1<=alpha_2[0] and err2<=alpha_2[1]:
+                    if all(x>L_2[0] for x in first) or all(x>L_2[1] for x in second):
+                        first.append(L_2[0])
+                        second.append(L_2[1])
+                        area.append(L_2[0]/12*(2-L_2[0])/0.5 + L_2[1]/12*(2-L_2[1])/0.5)
+                        err_list.append([L,err1,err2])
+                    b=True; break
+            if b: 
+                continue
+
+        obj_res = [(x[1]-alpha_2[0])**2 + (x[2]-alpha_2[1])**2 for x in err_list]
+        L_final.append(err_list[obj_res.index(min(obj_res))])
+
+    L_res = [sum(x) for x in zip(L_final[0][0],L_final[1][0],L_final[2][0])]
     
-    def obj_fun(qwer,a):
-        return (qwer[2]-a[0])**2 + (qwer[3]-a[1])**2
-    L_res = []
-    for i in [0,1,2]:
-        obj_vecs = np.apply_along_axis(obj_fun,1,res[i],a=alpha[slice(2*i,2*i+2)])
-        L_pair = res[i][np.argmin(obj_vecs),[0,1]]
-        L_res.append(L_pair[0]); L_res.append(L_pair[1])
-    
-    pred_neut = label_func(p0 = pred_probs[:,0], p1 = pred_probs[:,1], L = L_res)
+    pred_neut = label_func(p0 = p0, p1 = p1, L = L_res)
+
     conf_table = np.array((np.empty(4),np.empty(4),np.empty(4)))
     for i in [0,1,2]:
         row_sum = sum(y==i)
@@ -48,6 +59,7 @@ def asymmetric_neutral_zone(p0,p1,true_labels,alpha):
         conf_table[i][1] = sum((y==i) & (pred_neut=="1"))/row_sum
         conf_table[i][2] = sum((y==i) & (pred_neut=="2"))/row_sum
         conf_table[i][3] = sum((y==i) & (pred_neut=="N"))/row_sum
+    conf_table
     d = dict();
     d['L'] = L_res
     d['conf_table'] = conf_table
@@ -56,7 +68,7 @@ def asymmetric_neutral_zone(p0,p1,true_labels,alpha):
 
 X, y = make_classification(n_samples=1000, n_features=10, n_informative=5, n_redundant=5, n_classes=3, random_state=1)
 model = LogisticRegression(multi_class='multinomial', solver='lbfgs')
-# model.fit(x, ylab)
 res = model.fit(X, y)
+confusion_matrix(y_true=y , y_pred=res.predict(X), normalize='true') # check conditional misclassification rates
 pred_probs = res.predict_proba(X)
-asymmetric_neutral_zone(p0=pred_probs[:,0], p1=pred_probs[:,1], true_labels=y, alpha=[0.05,0.05,0.1,0.1,0.15,0.15])
+asymmetric_neutral_zone(p0=pred_probs[:,0], p1=pred_probs[:,1], true_labels=y, alpha=[0.1,0.1,0.1,0.1,0.1,0.1]) # make all conditional misclassifiation rates less than or equal to 0.1
