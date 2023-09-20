@@ -5,7 +5,7 @@ The R script is presented in the context of text classification as used in the a
 
 ## Python functions documentation
 **label_func**(*p0*, *p1*, *L*)  
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Label observations as 0, 1, 2, or N (neutral).
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Label observations as 0, 1, 2, or N (neutral) based on predicted probabilities of class 0, class 1, and set of $L$'s.
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Parameters**:  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;p0 : *array*  
@@ -41,4 +41,4 @@ The R script is presented in the context of text classification as used in the a
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Returns**:  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;out : *dictionary*  
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;A dictionary with two elements: `L` and `conf_table`. `L` is a list of the six *L*'s needed to achieve the desired conditional misclassification rates. `conf_table` is an array of the conditional misclassification rates. The rows represent the true labels 0, 1, and 2, respectively, and the columns represent the predictied labels 0, 1, 2, and N, respectively.
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;A dictionary with two elements: `L` and `conf_table`. `L` is a list of the six *L*'s ($L_{01}$, $L_{02}$, $L_{10}$, $L_{12}$, $L_{20}$, $L_{21}$) needed to achieve the desired conditional misclassification rates. `conf_table` is an array of the conditional misclassification rates. The rows represent the true labels 0, 1, and 2, respectively, and the columns represent the predictied labels 0, 1, 2, and N, respectively.
